@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "role": {
+      "$ref": "actor#/properties/roles"
+    }
+  }
+}

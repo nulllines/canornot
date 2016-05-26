@@ -1,0 +1,21 @@
+{
+  "esnext": true,
+  "bitwise": true,
+  "curly": true,
+  "eqeqeq": true,
+  "forin": true,
+  "immed": true,
+  "noarg": true,
+  "noempty": true,
+  "nonew": true,
+  "undef": true,
+  "strict": true,
+  "trailing": true,
+  "latedef": true,
+  "unused": true,
+  "indent": 4,
+  "quotmark": "single",
+  "browser": false,
+  "node": true
+}
+
