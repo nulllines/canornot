@@ -1,6 +1,6 @@
 {
   "name": "canornot",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "Experimental JSON Schema Authorisation Library",
   "main": "src/index.js",
   "scripts": {
@@ -18,6 +18,13 @@
     "auth",
     "authz"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nulllines/canornot"
+  },
+  "bugs": {
+    "url": "https://github.com/nulllines/canornot/issues"
+  },
   "dependencies": {
     "ajv": "^4.0.6",
     "debug": "^2.2.0",
