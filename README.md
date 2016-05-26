@@ -78,17 +78,26 @@ Example use of the above ABAC module
 //This is our ABAC module based on Canornot
 var abac  = require('./abac.js');
 
-// Create a check method based on this user id
-var user_id = 12344;
-var permission = abac(user_id);
+// Create a check method using the provided details (user_id)
+var permission = abac({user_id: 12344});
 
-permission.can('user:get', user_id)
+// Permission is allowed here
+permission.can('user:get', 12344)
     .then(function () {
         console.log('Permission allowed!');
     })
     .catch(function () {
         console.log('Permission denied!');
+    });
+
+// Permission is denied here!
+permission.can('user:get', 99999)
+    .then(function () {
+        console.log('Permission allowed!');
     })
+    .catch(function () {
+        console.log('Permission denied!');
+    });
 ```
 
 ### Support
