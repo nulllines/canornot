@@ -1,4 +1,4 @@
-An authorisation and access control library based on JSON Schema.
+An experimental authorisation and access control library based on JSON Schema.
 
 # Warning: highly experimental
 
@@ -85,6 +85,7 @@ permission.can('user:get', user_id)
     .catch(function () {
         console.log('Permission denied!');
     })
+```
 
 ### Support
 
