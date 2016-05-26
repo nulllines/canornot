@@ -1,20 +1,24 @@
+# Canornot?
+
+[![Build Status](https://travis-ci.org/maxholman/canornot.svg?branch=master)](https://travis-ci.org/maxholman/canornot)
+
 An experimental authorisation and access control library based on JSON Schema.
 
-# Warning: highly experimental
+## Warning: highly experimental
 
 This is known to not be particularly performant, and the API will likely change at the drop of a hat.
 
 Use at your own risk.
 
-## Install
+### Install
 
 ```bash
 npm install canornot --save
 ```
 
-## Usage
+### Usage
 
-Example ABAC module based on Canornot  (abac.js)
+Example ABAC module based on Canornot
 
 ```javascript
 var Canornot = require('canornot');
@@ -68,7 +72,7 @@ module.exports = function (options) {
 ```
 
 
-## Usage
+Example use of the above ABAC module
 
 ```javascript
 //This is our ABAC module based on Canornot
