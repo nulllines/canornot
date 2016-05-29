@@ -4,7 +4,9 @@
   "description": "Experimental JSON Schema Authorisation Library",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha",
+    "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "author": "",
   "license": "MIT",
@@ -34,6 +36,8 @@
   "devDependencies": {
     "benchmark": "^2.1.0",
     "chai": "^3.5.0",
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
     "jscs": "^3.0.3",
     "mocha": "^2.5.3"
   }
