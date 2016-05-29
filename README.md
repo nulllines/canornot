@@ -1,20 +1,24 @@
+# Canornot?
+
+[![npm version](https://badge.fury.io/js/canornot.svg)](https://badge.fury.io/js/canornot) [![Build Status](https://travis-ci.org/nulllines/canornot.svg?branch=master)](https://travis-ci.org/maxholman/canornot) [![Coverage Status](https://coveralls.io/repos/github/nulllines/canornot/badge.svg?branch=master)](https://coveralls.io/github/nulllines/canornot?branch=master)
+
 An experimental authorisation and access control library based on JSON Schema.
 
-# Warning: highly experimental
+## Warning: highly experimental
 
 This is known to not be particularly performant, and the API will likely change at the drop of a hat.
 
 Use at your own risk.
 
-## Install
+### Install
 
 ```bash
 npm install canornot --save
 ```
 
-## Usage
+### Usage
 
-Example ABAC module based on Canornot  (abac.js)
+Example ABAC module based on Canornot
 
 ```javascript
 var Canornot = require('canornot');
@@ -68,23 +72,32 @@ module.exports = function (options) {
 ```
 
 
-## Usage
+Example use of the above ABAC module
 
 ```javascript
 //This is our ABAC module based on Canornot
 var abac  = require('./abac.js');
 
-// Create a check method based on this user id
-var user_id = 12344;
-var permission = abac(user_id);
+// Create a check method using the provided details (user_id)
+var permission = abac({user_id: 12344});
 
-permission.can('user:get', user_id)
+// Permission is allowed here
+permission.can('user:get', 12344)
     .then(function () {
         console.log('Permission allowed!');
     })
     .catch(function () {
         console.log('Permission denied!');
+    });
+
+// Permission is denied here!
+permission.can('user:get', 99999)
+    .then(function () {
+        console.log('Permission allowed!');
     })
+    .catch(function () {
+        console.log('Permission denied!');
+    });
 ```
 
 ### Support

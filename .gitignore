@@ -1,7 +1,8 @@
 # Logs
 *.log
 
-# Coverage directory used by tools like istanbul
+# Coverage
+/.coveralls.yml
 coverage
 
 # Dependency directory

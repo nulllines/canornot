@@ -15,18 +15,14 @@ function PermissionError(message) {
     this.name = this.constructor.name;
     this.message = message;
 }
-//require('util').inherits(PermissionError, Error);
+
+require('util').inherits(PermissionError, Error);
 
 module.exports = function Canoronot(options) {
 
-    options = options || {
-            rejectOnValidatorError: false,
-            rejectOnPermissionDenied: false
-        };
-
     options = _.defaultsDeep(options || {}, {
-        rejectOnValidatorError: true,
-        rejectOnPermissionDenied: false
+        rejectOnError: true,
+        rejectOnPermissionDenied: true
     });
 
     /**
@@ -34,19 +30,28 @@ module.exports = function Canoronot(options) {
      */
     function getPolicySchema() {
         if (typeof options.policySchema === 'function') {
-            return new Promise(function (resolve, reject) {
-                return options.policySchema(function (result) {
-                    if (result instanceof Error) {
-                        reject(result);
-                    } else {
-                        resolve(result);
-                    }
+
+            // accepts a callback arguments
+            if (options.policySchema.length === 1) {
+                return new Promise(function (resolve, reject) {
+
+                    return options.policySchema(function (result) {
+                        if (result instanceof Error) {
+                            reject(result);
+                        } else {
+                            resolve(result);
+                        }
+                    });
                 });
-            });
+            } else {
+                return Promise.resolve(options.policySchema());
+            }
+
+        } else if (typeof options.policySchema === 'object' && typeof options.policySchema.then === 'function') {
+            return options.policySchema;
         } else {
             return Promise.resolve(options.policySchema);
         }
-
     }
 
     /**
@@ -54,15 +59,25 @@ module.exports = function Canoronot(options) {
      */
     function getActorSchema() {
         if (typeof options.actorSchema === 'function') {
-            return new Promise(function (resolve, reject) {
-                return options.actorSchema(function (result) {
-                    if (result instanceof Error) {
-                        reject(result);
-                    } else {
-                        resolve(result);
-                    }
+
+            // accepts a callback arguments
+            if (options.actorSchema.length === 1) {
+                return new Promise(function (resolve, reject) {
+
+                    return options.actorSchema(function (result) {
+                        if (result instanceof Error) {
+                            reject(result);
+                        } else {
+                            resolve(result);
+                        }
+                    });
                 });
-            });
+            } else {
+                return Promise.resolve(options.actorSchema());
+            }
+
+        } else if (typeof options.actorSchema === 'object' && typeof options.actorSchema.then === 'function') {
+            return options.actorSchema;
         } else {
             return Promise.resolve(options.actorSchema);
         }
@@ -163,7 +178,7 @@ module.exports = function Canoronot(options) {
                                 err.errors = validate.errors;
                                 throw err;
                             } else {
-                                return data;
+                                return valid;
                             }
                         } else {
                             debug('Returning `%s` result: %s', permission, valid);
@@ -232,23 +247,12 @@ module.exports = function Canoronot(options) {
             })
             .catch(function (err) {
 
-                // if (options.rejectOnValidatorError === true) {
-                //     throw err;
-                // } else {
-                //     return false;
-                // }
-
-                // AJV
-                if (err instanceof validator.ValidationError) {
-                    if (options.rejectOnPermissionDenied === true) {
-                        throw new PermissionError(err.message);
-                    } else {
-                        return false;
-                    }
+                // it's not a basic permission error;
+                if (err instanceof PermissionError && options.rejectOnPermissionDenied === true) {
+                    throw err;
                 } else {
-
-                    if (options.rejectOnValidatorError === true) {
-                        throw new Error(err.message);
+                    if (options.rejectOnError === true) {
+                        throw err;
                     } else {
                         return false;
                     }
@@ -260,3 +264,6 @@ module.exports = function Canoronot(options) {
     this.has = this.can;
 
 };
+
+// so we can access the validator from outside the scope - nice for testing.
+module.exports.validator = validator;
