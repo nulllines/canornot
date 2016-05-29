@@ -316,7 +316,7 @@ describe('Base', function () {
             .then(function () {
                 done(new Error('This test should throw an error'));
             })
-            .catch(function (err) {
+            .catch(function () {
                 done();
             })
             .catch(done);
@@ -361,7 +361,6 @@ describe('Base', function () {
                 done(new Error('This test should throw an error'));
             })
             .catch(function (err) {
-                console.log(err);
                 assert.instanceOf(err, Error);
                 done();
             })
