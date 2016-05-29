@@ -3,18 +3,14 @@
 'use strict';
 
 var Canornot = require('../../src/index');
-var policySchema = require('../fixtures/rbac.json');
 
-function getActorSchema(cb) {
-    cb({
-        properties: {
-            roles: {
-                type: 'string',
-                enum: ['admin', 'user']
-            }
+var policySchema = {
+    properties: {
+        role: {
+            $ref: 'actor#/properties/roles'
         }
-    });
-}
+    }
+};
 
 function getActorSchemaPromise() {
     return Promise.resolve({

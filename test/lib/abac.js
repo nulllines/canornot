@@ -3,7 +3,30 @@
 'use strict';
 
 var Canornot = require('../../src/index');
-var policySchema = require('./../fixtures/abac.json');
+
+var policySchema = {
+        properties: {
+            'user:get': {
+                $ref: 'actor#/properties/user_id'
+            },
+            'project:get': {
+                $ref: 'actor#/properties/project_ids'
+            },
+            'account:get': {
+                required: ['account_id'],
+                type: 'object',
+                properties: {
+                    account_id: {
+                        $ref: 'actor#/properties/account_ids'
+                    }
+                }
+            },
+            'account:list': {
+                $ref: 'actor#/properties/account_ids'
+            },
+            'project:list': {}
+        }
+    };
 
 function getActorSchema() {
     return {
@@ -19,11 +42,11 @@ function getActorSchema() {
             },
             project_ids: {
                 type: 'number',
-                enum: [1,2,3,4,5]
+                enum: [1, 2, 3, 4, 5]
             },
             account_ids: {
                 type: 'number',
-                enum: [11,22,33,44]
+                enum: [11, 22, 33, 44]
             },
             role: {
                 type: 'string',
@@ -36,6 +59,7 @@ function getActorSchema() {
 
 module.exports = function (/*options*/) {
     return new Canornot({
+        rejectOnPermissionDenied: false,
         actorSchema: getActorSchema(),
         policySchema: policySchema
     });
