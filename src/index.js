@@ -22,7 +22,8 @@ module.exports = function Canoronot(options) {
 
     options = _.defaultsDeep(options || {}, {
         rejectOnError: true,
-        rejectOnPermissionDenied: true
+        rejectOnPermissionDenied: true,
+        returnSchemas: false
     });
 
     /**
@@ -139,10 +140,10 @@ module.exports = function Canoronot(options) {
 
                 // AJV
                 return Promise.all([getActorSchema(), getPolicySchema()])
-                    .then(function (results) {
+                    .then(function (schemas) {
 
-                        var actorSchema = results[0];
-                        var policySchema = results[1];
+                        var actorSchema = schemas[0];
+                        var policySchema = schemas[1];
 
                         if (typeof actorSchema !== 'object') {
                             throw new TypeError('Actor Schema must be an object or a function/promise that returns an object. Saw ' + typeof actorSchema);
@@ -154,8 +155,6 @@ module.exports = function Canoronot(options) {
 
                         var ajv = validator({
                             breakOnError: true
-                            //allErrors: true,
-                            //v5: true
                         });
 
                         ajv.addSchema(actorSchema, 'actor');
@@ -178,7 +177,7 @@ module.exports = function Canoronot(options) {
                                 err.errors = validate.errors;
                                 throw err;
                             } else {
-                                return valid;
+                                return options.returnSchemas ? schemas : valid;
                             }
                         } else {
                             debug('Returning `%s` result: %s', permission, valid);
