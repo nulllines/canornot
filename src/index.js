@@ -177,7 +177,14 @@ module.exports = function Canoronot(options) {
                                 err.errors = validate.errors;
                                 throw err;
                             } else {
-                                return options.returnSchemas ? schemas : valid;
+                                if (options.returnSchemas) {
+                                    return {
+                                        actor: actorSchema,
+                                        policy: policySchema
+                                    };
+                                } else {
+                                    return valid;
+                                }
                             }
                         } else {
                             debug('Returning `%s` result: %s', permission, valid);
