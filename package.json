@@ -34,7 +34,7 @@
     "lodash.omit": "^4.3.0"
   },
   "devDependencies": {
-    "benchmark": "^2.1.0",
+    "benchmark": "^2.1.1",
     "chai": "^3.5.0",
     "coveralls": "^2.11.9",
     "istanbul": "^0.4.3",
