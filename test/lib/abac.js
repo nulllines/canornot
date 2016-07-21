@@ -28,7 +28,7 @@ var policySchema = {
         'project:list': {}
     },
     patternProperties: {
-        "^payment:\w+$": {
+        '^payment:\w+$': {
             $ref: 'actor#/properties/account_ids'
         }
     }
@@ -40,6 +40,7 @@ function getActorSchema() {
         $schema: 'http://json-schema.org/draft-04/schema#',
         description: 'Actor Properties',
         type: 'object',
+        additionalProperties: false,
         properties: {
             user_id: {
                 type: 'number',
