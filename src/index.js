@@ -154,27 +154,41 @@ module.exports = function Canoronot(options) {
                         }
 
                         var ajv = validator({
+                            missingRefs: 'fail',
                             breakOnError: true
                         });
 
                         ajv.addSchema(actorSchema, 'actor');
-                        ajv.addSchema(policySchema, 'policy');
+                        //ajv.addSchema(policySchema, 'policy');
 
-                        var validate = ajv.compile({
-                            $ref: 'policy#/properties/' + permission
+                        // var validate = ajv.compile({
+                        //     $ref: 'policy#/properties/' + permission
+                        // });
+
+                        // var valid = validate(data);
+                        //
+                        // var validate = ajv.compile({
+                        //     $ref: 'policy#/properties/' + permission
+                        // });
+
+                        policySchema.additionalProperties = false;
+
+                        var valid = ajv.validate(policySchema, {
+                            [permission]: data
                         });
 
-                        var valid = validate(data);
-
-                        debug('Permission `%s` against data `%s` - allowed: `%s`', permission, JSON.stringify(data), valid);
-
-                        debug('rejectOnPermissionDenied: `%s`', options.rejectOnPermissionDenied);
+                        debug('policySchema', policySchema);
+                        debug('actorSchema', actorSchema);
+                        debug('Permission data', JSON.stringify({
+                            [permission]: data
+                        }));
+                        debug('Permission allowed/valid?', valid);
 
                         if (options.rejectOnPermissionDenied === true) {
                             if (!valid) {
-                                debug('Throwing PermissionError', validate.errors);
+                                debug('Throwing PermissionError', ajv.errors);
                                 var err = new PermissionError('Permission Denied for `' + permission + '` against `' + JSON.stringify(data) + '`');
-                                err.errors = validate.errors;
+                                err.errors = ajv.errors;
                                 throw err;
                             } else {
                                 if (options.returnSchemas) {
