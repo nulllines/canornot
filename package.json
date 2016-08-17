@@ -36,7 +36,7 @@
   "devDependencies": {
     "benchmark": "^2.1.1",
     "chai": "^3.5.0",
-    "coveralls": "^2.11.9",
+    "coveralls": "^2.11.12",
     "istanbul": "^0.4.3",
     "jscs": "^3.0.3",
     "mocha": "^2.5.3"
