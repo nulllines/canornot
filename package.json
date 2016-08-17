@@ -31,13 +31,14 @@
     "ajv": "^4.1.7",
     "debug": "^2.2.0",
     "lodash.defaultsdeep": "^4.4.0",
-    "lodash.omit": "^4.3.0"
+    "lodash.omit": "^4.4.0"
   },
   "devDependencies": {
+    "benchmark": "^2.1.1",
     "chai": "^3.5.0",
-    "coveralls": "^2.11.11",
+    "coveralls": "^2.11.12",
     "istanbul": "^0.4.4",
     "jscs": "^3.0.7",
-    "mocha": "^2.5.3"
+    "mocha": "^3.0.2"
   }
 }
