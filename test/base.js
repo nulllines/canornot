@@ -432,4 +432,16 @@ describe('Base', function () {
             .catch(done);
     });
 
+    // it('Access Control using patternProperties to allow an entire namespace', function (done) {
+    //
+    //     var permission = acWithObjects();
+    //
+    //     permission.can('payment:something', 33)
+    //         .then(function (valid) {
+    //             assert.isNotOk(valid);
+    //             done();
+    //         })
+    //         .catch(done);
+    // });
+
 });

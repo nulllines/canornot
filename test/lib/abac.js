@@ -5,28 +5,34 @@
 var Canornot = require('../../src/index');
 
 var policySchema = {
-        properties: {
-            'user:get': {
-                $ref: 'actor#/properties/user_id'
-            },
-            'project:get': {
-                $ref: 'actor#/properties/project_ids'
-            },
-            'account:get': {
-                required: ['account_id'],
-                type: 'object',
-                properties: {
-                    account_id: {
-                        $ref: 'actor#/properties/account_ids'
-                    }
+    additionalProperties: false,
+    properties: {
+        'user:get': {
+            $ref: 'actor#/properties/user_id'
+        },
+        'project:get': {
+            $ref: 'actor#/properties/project_ids'
+        },
+        'account:get': {
+            required: ['account_id'],
+            type: 'object',
+            properties: {
+                account_id: {
+                    $ref: 'actor#/properties/account_ids'
                 }
-            },
-            'account:list': {
-                $ref: 'actor#/properties/account_ids'
-            },
-            'project:list': {}
+            }
+        },
+        'account:list': {
+            $ref: 'actor#/properties/account_ids'
+        },
+        'project:list': {}
+    },
+    patternProperties: {
+        '^payment:\w+$': {
+            $ref: 'actor#/properties/account_ids'
         }
-    };
+    }
+};
 
 function getActorSchema() {
     return {

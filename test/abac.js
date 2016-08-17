@@ -3,7 +3,6 @@
 'use strict';
 
 var abac = require('./lib/abac');
-var rbac = require('./lib/rbac');
 
 describe('ABAC', function () {
 
@@ -50,7 +49,7 @@ describe('ABAC', function () {
 
     it('Permission user:get attributes as undefined (REJECTED)', function (done) {
 
-        ac.can('user:get', undefined)
+        ac.can('user:get')
             .then(function (allowed) {
                 if (allowed === true) {
                     throw new Error('This test should disallow permission');
@@ -103,21 +102,3 @@ describe('ABAC', function () {
 
 });
 
-describe('RBAC', function () {
-
-    var ac = rbac();
-
-    it('Basic role check', function (done) {
-
-        ac.has('role', 'admin')
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
-                    throw new Error('Permission denied');
-                }
-            })
-            .catch(done);
-    });
-
-});

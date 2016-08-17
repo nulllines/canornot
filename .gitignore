@@ -1,6 +1,3 @@
-# Logs
-*.log
-
 # Coverage
 /.coveralls.yml
 coverage
@@ -9,7 +6,7 @@ coverage
 node_modules
 
 # JetBrains
-.idea/*
+.idea
 
 # VIM
 [._]*.s[a-w][a-z]
@@ -22,7 +19,4 @@ Session.vim
 # Temp directory
 tmp
 
-src/authz.js
-src/test.js
-test/benchmark.js
-test/lib/abac-authz.js
+test/lib/benchmark.js

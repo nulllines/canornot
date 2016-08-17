@@ -1,6 +1,6 @@
 {
   "name": "canornot",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Experimental JSON Schema Authorisation Library",
   "main": "src/index.js",
   "scripts": {
@@ -28,17 +28,17 @@
     "url": "https://github.com/nulllines/canornot/issues"
   },
   "dependencies": {
-    "ajv": "^4.0.6",
+    "ajv": "^4.5.0",
     "debug": "^2.2.0",
-    "lodash.defaultsdeep": "^4.4.0",
-    "lodash.omit": "^4.3.0"
+    "lodash.defaultsdeep": "^4.6.0",
+    "lodash.omit": "^4.5.0"
   },
   "devDependencies": {
-    "benchmark": "^2.1.0",
+    "benchmark": "^2.1.1",
     "chai": "^3.5.0",
-    "coveralls": "^2.11.9",
-    "istanbul": "^0.4.3",
-    "jscs": "^3.0.3",
-    "mocha": "^2.5.3"
+    "coveralls": "^2.11.12",
+    "istanbul": "^0.4.4",
+    "jscs": "^3.0.7",
+    "mocha": "^3.0.2"
   }
 }
