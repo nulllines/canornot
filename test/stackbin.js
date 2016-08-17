@@ -2,11 +2,11 @@
 
 'use strict';
 
-var rbac = require('./lib/stackbin');
+var abac = require('./lib/stackbin');
 
 describe('Stackbin', function () {
 
-    var ac = rbac();
+    var ac = abac();
 
     it('Basic User check', function (done) {
 
@@ -14,12 +14,8 @@ describe('Stackbin', function () {
             .can('user:get', {
                 user_id: '00000098038114680832'
             })
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
-                    throw new Error('This test should allow permission');
-                }
+            .then(function () {
+                done();
             })
             .catch(done);
     });
@@ -33,7 +29,8 @@ describe('Stackbin', function () {
             .then(function () {
                 throw new Error('This test should disallow permission');
             })
-            .catch(function () {
+            .catch(function (err) {
+                console.log(err);
                 done();
             });
     });
