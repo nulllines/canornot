@@ -49,7 +49,7 @@ describe('ABAC', function () {
 
     it('Permission user:get attributes as undefined (REJECTED)', function (done) {
 
-        ac.can('user:get', undefined)
+        ac.can('user:get')
             .then(function (allowed) {
                 if (allowed === true) {
                     throw new Error('This test should disallow permission');
