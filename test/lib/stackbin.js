@@ -63,7 +63,9 @@ var actorSchema = {
     type: 'object',
     additionalProperties: false,
     properties: {
-        user_id: {enum: ['00000098038114680832']}
+        user_id: {
+            enum: ['00000098038114680832']
+        }
     }
 };
 
