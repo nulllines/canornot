@@ -2,8 +2,9 @@
 
 var validator = require('ajv');
 var debug = require('debug')('canornot');
-//var validator = require('is-my-json-valid');
-//var validator = require('jsen');
+
+/*var validator = require('is-my-json-valid');
+var validator = require('jsen');*/
 
 var _ = {
     defaultsDeep: require('lodash.defaultsdeep'),
@@ -18,7 +19,7 @@ function PermissionError(message) {
 
 require('util').inherits(PermissionError, Error);
 
-module.exports = function Canoronot(options) {
+module.exports = function (options) {
 
     options = _.defaultsDeep(options || {}, {
         rejectOnError: true,
@@ -135,6 +136,12 @@ module.exports = function Canoronot(options) {
             return Promise.reject(new TypeError('Permission must be a string'));
         }
 
+        // ajv seems to pass validation with undefined, but not an empty object
+        // so, force it to be an object if data was not passed
+        if (data === undefined) {
+            data = {};
+        }
+
         return init()
             .then(function () {
 
@@ -159,6 +166,7 @@ module.exports = function Canoronot(options) {
                         });
 
                         ajv.addSchema(actorSchema, 'actor');
+
                         //ajv.addSchema(policySchema, 'policy');
 
                         // var validate = ajv.compile({
