@@ -8,7 +8,9 @@
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha",
     "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
-  "author": "",
+  "contributors": [
+    "Max Holman <max@holmn.com> (https://www.maxholman.com)"
+  ],
   "license": "MIT",
   "keywords": [
     "rbac",
