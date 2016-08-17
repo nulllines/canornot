@@ -30,7 +30,6 @@ describe('Stackbin', function () {
                 throw new Error('This test should disallow permission');
             })
             .catch(function (err) {
-                console.log(err);
                 done();
             });
     });
