@@ -1,6 +1,6 @@
 {
   "name": "canornot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Experimental JSON Schema Authorisation Library",
   "main": "src/index.js",
   "scripts": {
