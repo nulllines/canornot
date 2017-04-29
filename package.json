@@ -30,7 +30,7 @@
     "url": "https://github.com/nulllines/canornot/issues"
   },
   "dependencies": {
-    "ajv": "^4.5.0",
+    "ajv": "^5.0.1",
     "debug": "^2.2.0",
     "lodash.defaultsdeep": "^4.6.0",
     "lodash.omit": "^4.5.0"
