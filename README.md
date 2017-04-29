@@ -1,5 +1,7 @@
 # Canornot?
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/nulllines/canornot.svg)](https://greenkeeper.io/)
+
 [![npm version](https://badge.fury.io/js/canornot.svg)](https://badge.fury.io/js/canornot) [![Build Status](https://travis-ci.org/nulllines/canornot.svg?branch=master)](https://travis-ci.org/maxholman/canornot) [![Coverage Status](https://coveralls.io/repos/github/nulllines/canornot/badge.svg?branch=master)](https://coveralls.io/github/nulllines/canornot?branch=master)
 
 An experimental authorisation and access control library based on JSON Schema.
