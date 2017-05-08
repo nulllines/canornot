@@ -1,37 +1,30 @@
-/* jshint mocha: true */
+/* eslint-env mocha */
 
 'use strict';
 
-var abac = require('./lib/stackbin');
+const assert = require('chai').assert;
+const abac = require('./lib/stackbin');
+
+const PermissionError = require('../src/error').PermissionError;
 
 describe('Stackbin', function () {
 
-    var ac = abac();
+    const ac = abac();
 
-    it('Basic User check', function (done) {
-
-        ac
-            .can('user:get', {
-                user_id: '00000098038114680832'
-            })
-            .then(function () {
-                done();
-            })
-            .catch(done);
+    it('Basic User check', function () {
+        return ac.can('user:get', {user_id: '00000098038114680832'});
     });
 
-    it('Basic User check REJECT', function (done) {
+    it('Basic User check REJECT', function () {
 
-        ac
+        return ac
             .can('user:get', {
                 user_id: '00030164495926034432'
             })
-            .then(function () {
+            .then(() => {
                 throw new Error('This test should disallow permission');
             })
-            .catch(function () {
-                done();
-            });
+            .catch(err => assert.instanceOf(err, PermissionError));
     });
 
 });

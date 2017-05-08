@@ -1,5 +1,6 @@
 # Coverage
-/.coveralls.yml
+.coveralls.yml
+.nyc_output
 coverage
 
 # Dependency directory
@@ -7,16 +8,5 @@ node_modules
 
 # JetBrains
 .idea
-
-# VIM
-[._]*.s[a-w][a-z]
-[._]s[a-w][a-z]
-*.un~
-Session.vim
-*~
-*.swp
-
-# Temp directory
-tmp
 
 test/lib/benchmark.js

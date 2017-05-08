@@ -1,10 +1,22 @@
-/* jshint mocha: true */
+/* eslint-env mocha */
 'use strict';
 
-var Canornot = require('../src/index');
-var assert = require('chai').assert;
+const util = require('util');
+const Canornot = require('../src/index');
+const assert = require('chai').assert;
 
-var policySchema = {
+const ValidationError = require('ajv').ValidationError;
+const PermissionError = require('../src/error').PermissionError;
+
+function TestError(message) {
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+    this.message = message;
+}
+
+util.inherits(TestError, Error);
+
+const policySchema = {
     properties: {
         'user:get': {
             $ref: 'actor#/properties/user_id'
@@ -12,7 +24,7 @@ var policySchema = {
     }
 };
 
-var actorSchema = {
+const actorSchema = {
     properties: {
         user_id: {
             type: 'number',
@@ -21,422 +33,288 @@ var actorSchema = {
     }
 };
 
-var acWithCallbacks = function (/*options*/) {
-    return new Canornot({
-        actorSchema: function (cb) {
-            setTimeout(function () {
-                cb(actorSchema);
-            }, 200);
-        },
+const acWithTimeoutCallbacks = () => new Canornot({
+    actorSchema: cb => setTimeout(() => cb(actorSchema), 200),
+    policySchema: cb => setTimeout(() => cb(policySchema), 200)
+});
 
-        policySchema: function (cb) {
-            setTimeout(function () {
-                cb(policySchema);
-            }, 200);
-        }
-    });
-};
+const acWithTimeoutCallbackActorError = () => new Canornot({
+    actorSchema: cb => setTimeout(() => cb(new TestError('Intentional Error')), 200),
+    policySchema: cb => setTimeout(() => cb(policySchema), 200)
+});
 
-var acWithCallbackActorError = function (/*options*/) {
-    return new Canornot({
-        actorSchema: function (cb) {
-            setTimeout(function () {
-                cb(new Error());
-            }, 200);
-        },
+const acWithTimeoutCallbackPolicyError = () => new Canornot({
+    actorSchema: cb => setTimeout(() => cb(new TestError('Intentional Error')), 200),
+    policySchema: cb => setTimeout(() => cb(new TestError('Intentional Error')), 200)
+});
 
-        policySchema: function (cb) {
-            setTimeout(function () {
-                cb(policySchema);
-            }, 200);
-        }
-    });
-};
+const acWithTimeoutPromises = () => new Canornot({
+    actorSchema: new Promise(resolve => setTimeout(() => resolve(actorSchema), 200)),
+    policySchema: new Promise(resolve => setTimeout(() => resolve(policySchema), 200))
+});
 
-var acWithCallbackPolicyError = function (/*options*/) {
-    return new Canornot({
-        actorSchema: function (cb) {
-            setTimeout(function () {
-                cb(actorSchema);
-            }, 200);
-        },
+const acWithTimeoutBrokenPromises = () => new Canornot({
+    actorSchema: new Promise((_, reject) => setTimeout(() => reject(new TestError('Intentional Error')), 200)),
+    policySchema: new Promise((_, reject) => setTimeout(() => reject(new TestError('Intentional Error')), 200))
+});
 
-        policySchema: function (cb) {
-            setTimeout(function () {
-                cb(new Error());
-            }, 200);
-        }
-    });
-};
+const acWithObjects = () => new Canornot({
+    actorSchema: actorSchema,
+    policySchema: policySchema
+});
 
-var acWithPromises = function (/*options*/) {
+const acWithFunctions = () => new Canornot({
+    actorSchema: () => actorSchema,
+    policySchema: () => policySchema
+});
 
-    return new Canornot({
-        actorSchema: new Promise(function (resolve) {
-            setTimeout(function () {
-                resolve(actorSchema);
-            }, 200);
-        }),
+const acWithStrings1 = () => new Canornot({
+    actorSchema: 'hahaha',
+    policySchema: policySchema
+});
 
-        policySchema: new Promise(function (resolve) {
-            setTimeout(function () {
-                resolve(policySchema);
-            }, 200);
-        })
-    });
-};
+const acWithStrings2 = () => new Canornot({
+    actorSchema: actorSchema,
+    policySchema: 'heeee'
+});
 
-var acWithBrokenPromises = function (/*options*/) {
+const acWithNoOptions = () => new Canornot();
 
-    return new Canornot({
-        actorSchema: new Promise(function (resolve, reject) {
-            setTimeout(function () {
-                reject(new Error());
-            }, 200);
-        }),
+const acWithRejectOnPermissionDenied = () => new Canornot({
+    actorSchema: actorSchema,
+    policySchema: policySchema,
+    rejectOnPermissionDenied: true
+});
 
-        policySchema: new Promise(function (resolve, reject) {
-            setTimeout(function () {
-                reject(new Error());
-            }, 200);
-        })
-    });
-};
+const acWithoutRejectOnPermissionDenied = () => new Canornot({
+    actorSchema: actorSchema,
+    policySchema: policySchema,
+    rejectOnPermissionDenied: false
+});
 
-var acWithObjects = function (/*options*/) {
-    return new Canornot({
-        actorSchema: actorSchema,
-        policySchema: policySchema
-    });
-};
+const acWithoutRejectOnError = () => new Canornot({
+    actorSchema: Promise.reject(new ValidationError()),
+    policySchema: Promise.reject(new ValidationError()),
+    rejectOnError: false
+});
 
-var acWithFunctions = function (/*options*/) {
-    return new Canornot({
-        actorSchema: function () {
-            return actorSchema;
-        },
-
-        policySchema: function () {
-            return policySchema;
-        }
-    });
-};
-
-var acWithStrings1 = function (/*options*/) {
-    return new Canornot({
-        actorSchema: 'hahaha',
-        policySchema: policySchema
-    });
-};
-
-var acWithStrings2 = function (/*options*/) {
-    return new Canornot({
-        actorSchema: actorSchema,
-        policySchema: 'heeee'
-    });
-};
-
-var acWithNoOptions = function (/*options*/) {
-    return new Canornot();
-};
-
-var acWithRejectOnPermissionDenied = function (/*options*/) {
-    return new Canornot({
-        actorSchema: actorSchema,
-        policySchema: policySchema,
-        rejectOnPermissionDenied: true
-    });
-};
-
-var acWithoutRejectOnPermissionDenied = function (/*options*/) {
-    return new Canornot({
-        actorSchema: actorSchema,
-        policySchema: policySchema,
-        rejectOnPermissionDenied: false
-    });
-};
-
-var acWithoutRejectOnError = function (/*options*/) {
-    return new Canornot({
-        actorSchema: Promise.reject(new Canornot.validator.ValidationError()),
-        policySchema: Promise.reject(new Canornot.validator.ValidationError()),
-        rejectOnError: false
-    });
-};
-
-var acWithRejectOnError = function (/*options*/) {
-    return new Canornot({
-        actorSchema: Promise.reject(new Canornot.validator.ValidationError()),
-        policySchema: Promise.reject(new Canornot.validator.ValidationError())
-    });
-};
+const acWithRejectOnError = () => new Canornot({
+    actorSchema: Promise.reject(new ValidationError()),
+    policySchema: Promise.reject(new ValidationError())
+});
 
 describe('Base', function () {
 
-    it('Access Control with schema provided via callback', function (done) {
+    it('Access Control with schema provided via callback', function () {
 
-        var permission = acWithCallbacks();
+        const permission = acWithTimeoutCallbacks();
+        this.timeout(400);
 
-        permission.can('user:get', 1)
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
-                    throw new Error('Unexpected allowance');
+        return permission.can('user:get', 1)
+            .then(allowed => {
+                if (allowed !== true) {
+                    throw new Error('Unexpectedly forbidden');
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Access Control with schema provided via Promises', function (done) {
+    it('Access Control with schema provided via Promises', function () {
 
-        var permission = acWithPromises();
+        const permission = acWithTimeoutPromises();
+        this.timeout(400);
 
-        permission.can('user:get', 1)
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
-                    throw new Error('Unexpected allowance');
+        return permission.can('user:get', 1)
+            .then(allowed => {
+                if (allowed !== true) {
+                    throw new Error('Unexpectedly forbidden');
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Access Control with schema provided via objects', function (done) {
+    it('Access Control with schema provided via objects', function () {
 
-        var permission = acWithObjects();
+        const permission = acWithObjects();
 
-        permission.can('user:get', 1)
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
-                    throw new Error('Unexpected allowance');
+        return permission.can('user:get', 1)
+            .then(allowed => {
+                if (allowed !== true) {
+                    throw new Error('Unexpectedly forbidden');
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Access Control with schema provided via functions', function (done) {
+    it('Access Control with schema provided via functions', function () {
 
-        var permission = acWithFunctions();
+        const permission = acWithFunctions();
 
-        permission.can('user:get', 1)
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
-                    throw new Error('Unexpected allowance');
+        return permission.can('user:get', 1)
+            .then(allowed => {
+                if (allowed !== true) {
+                    throw new Error('Unexpectedly forbidden');
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Access Control with broken promises', function (done) {
+    it('Access Control with broken promises', function () {
 
-        var permission = acWithBrokenPromises();
+        const permission = acWithTimeoutBrokenPromises();
+        this.timeout(400);
 
-        permission.can('user:get', 1)
-            .then(function () {
-                done(new Error('This test should throw an error'));
+        return permission.can('user:get', 1)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(function (err) {
-                assert.instanceOf(err, Error);
-                done();
-            })
-            .catch(done);
+            .catch(err => {
+                assert.instanceOf(err, TestError);
+            });
     });
 
-    it('Access Control with callback actor errors', function (done) {
+    it('Access Control with callback actor errors', function () {
 
-        var permission = acWithCallbackActorError();
+        const permission = acWithTimeoutCallbackActorError();
+        this.timeout(400);
 
-        permission.can('user:get', 1)
-            .then(function () {
-                done(new Error('This test should throw an error'));
+        return permission.can('user:get', 1)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(function (err) {
-                assert.instanceOf(err, Error);
-                done();
-            })
-            .catch(done);
+            .catch(err => assert.instanceOf(err, TestError));
     });
 
-    it('Access Control with callback policy errors', function (done) {
+    it('Access Control with callback policy errors', function () {
 
-        var permission = acWithCallbackPolicyError();
+        const permission = acWithTimeoutCallbackPolicyError();
+        this.timeout(400);
 
-        permission.can('user:get', 1)
-            .then(function () {
-                done(new Error('This test should throw an error'));
+        return permission.can('user:get', 1)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(function (err) {
-                assert.instanceOf(err, Error);
-                done();
-            })
-            .catch(done);
+            .catch(err => assert.instanceOf(err, TestError));
     });
 
-    it('Access Control with callback policy errors', function (done) {
+    it('Access Control with callback policy errors', function () {
 
-        var permission = acWithCallbackPolicyError();
+        const permission = acWithTimeoutCallbackPolicyError();
+        this.timeout(400);
 
-        permission.can('user:get', 1)
-            .then(function () {
-                done(new Error('This test should throw an error'));
+        return permission.can('user:get', 1)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(function (err) {
-                assert.instanceOf(err, Error);
-                done();
-            })
-            .catch(done);
+            .catch(err => assert.instanceOf(err, TestError));
     });
 
-    it('Access Control with policy TypeErrors0', function (done) {
+    it('Access Control with policy TypeErrors0', function () {
 
-        var permission = acWithObjects();
+        const permission = acWithObjects();
 
-        permission.can(1111111)
-            .then(function () {
-                done(new Error('This test should throw an error'));
+        return permission.can(1111111)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(function (err) {
+            .catch(err => assert.instanceOf(err, TypeError));
+    });
+
+    it('Access Control with policy TypeErrors1', function () {
+
+        const permission = acWithStrings1();
+
+        return permission.can('user:get', 1)
+            .then(() => {
+                throw new Error('This test should throw an error');
+            })
+            .catch(err => assert.instanceOf(err, TypeError));
+    });
+
+    it('Access Control with policy TypeErrors2', function () {
+
+        const permission = acWithStrings2();
+
+        return permission.can('user:get', 1)
+            .then(() => {
+                throw new Error('This test should throw an error');
+            })
+            .catch(err => {
                 assert.instanceOf(err, TypeError);
-                done();
-            })
-            .catch(done);
+            });
     });
 
-    it('Access Control with policy TypeErrors1', function (done) {
+    it('Access Control with no options', function () {
 
-        var permission = acWithStrings1();
+        const permission = acWithNoOptions();
 
-        permission.can('user:get', 1)
-            .then(function () {
-                done(new Error('This test should throw an error'));
+        return permission.can('user:get', 1)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(function () {
-                done();
-            })
-            .catch(done);
-    });
-
-    it('Access Control with policy TypeErrors2', function (done) {
-
-        var permission = acWithStrings2();
-
-        permission.can('user:get', 1)
-            .then(function () {
-                done(new Error('This test should throw an error'));
-            })
-            .catch(function (err) {
+            .catch(err => {
                 assert.instanceOf(err, TypeError);
-                done();
-            })
-            .catch(done);
+            });
     });
 
-    it('Access Control with no options', function (done) {
+    it('Access Control with reject (expected fail)', function () {
 
-        var permission = acWithNoOptions();
+        const permission = acWithRejectOnPermissionDenied();
 
-        permission.can('user:get', 1)
-            .then(function () {
-                done(new Error('This test should throw an error'));
+        return permission.can('user:get', 99999999999)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(function (err) {
-                assert.instanceOf(err, TypeError);
-                done();
-            })
-            .catch(done);
+            .catch(err => assert.instanceOf(err, PermissionError));
     });
 
-    it('Access Control with reject (expected fail)', function (done) {
+    it('Access Control with reject (expected success)', function () {
 
-        var permission = acWithRejectOnPermissionDenied();
+        const permission = acWithRejectOnPermissionDenied();
 
-        permission.can('user:get', 99999999999)
-            .then(function () {
-                done(new Error('This test should throw an error'));
-            })
-            .catch(function (err) {
-                assert.instanceOf(err, Error);
-                done();
-            })
-            .catch(done);
+        return permission.can('user:get', 1);
+
     });
 
-    it('Access Control with reject (expected success)', function (done) {
+    it('Access Control without reject', function () {
 
-        var permission = acWithRejectOnPermissionDenied();
+        const permission = acWithoutRejectOnPermissionDenied();
 
-        permission.can('user:get', 1)
-            .then(function () {
-                done();
-            })
-            .catch(done);
+        return permission.can('user:get', 999999999)
+            .then(valid => assert.isNotOk(valid));
     });
 
-    it('Access Control without reject', function (done) {
+    it('Access Control missing permission', function () {
 
-        var permission = acWithoutRejectOnPermissionDenied();
+        const permission = acWithObjects();
 
-        permission.can('user:get', 999999999)
-            .then(function (valid) {
-                assert.isNotOk(valid);
-                done();
+        return permission.can('missing:permission', 999999999)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(done);
+            .catch(err => assert.instanceOf(err, PermissionError));
     });
 
-    it('Access Control missing permission', function (done) {
+    it('Access Control without reject on validator error', function () {
 
-        var permission = acWithObjects();
+        const permission = acWithoutRejectOnError();
 
-        permission.can('missing:permission', 999999999)
-            .then(function () {
-                done(new Error('This test should throw an error'));
-            })
-            .catch(function (err) {
-                assert.instanceOf(err, Error);
-                done();
-            })
-            .catch(done);
+        return permission.can('missing:permission', 999999999)
+            .then(valid => assert.isNotOk(valid));
     });
 
-    it('Access Control without reject on validator error', function (done) {
+    it('Access Control with reject on validator error', function () {
 
-        var permission = acWithoutRejectOnError();
+        const permission = acWithRejectOnError();
 
-        permission.can('missing:permission', 999999999)
-            .then(function (valid) {
-                assert.isNotOk(valid);
-                done();
+        return permission.can('missing:permission', 999999999)
+            .then(() => {
+                throw new Error('This test should throw an error');
             })
-            .catch(done);
+            .catch(err => assert.instanceOf(err, ValidationError));
     });
 
-    it('Access Control with reject on validator error', function (done) {
-
-        var permission = acWithRejectOnError();
-
-        permission.can('missing:permission', 999999999)
-            .then(function () {
-                done(new Error('This test should throw an error'));
-            })
-            .catch(function (err) {
-                assert.instanceOf(err, Error);
-                done();
-            })
-            .catch(done);
-    });
-
-    // it('Access Control using patternProperties to allow an entire namespace', function (done) {
+    // it('Access Control using patternProperties to allow an entire namespace', function () {
     //
-    //     var permission = acWithObjects();
+    //     const permission = acWithObjects();
     //
-    //     permission.can('payment:something', 33)
+    //     return permission.can('payment:something', 33)
     //         .then(function (valid) {
     //             assert.isNotOk(valid);
     //             done();

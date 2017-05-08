@@ -1,24 +1,21 @@
-/* jshint mocha: true */
+/* eslint-env mocha */
 
 'use strict';
 
-var rbac = require('./lib/rbac');
+const rbac = require('./lib/rbac');
 
 describe('RBAC', function () {
 
-    var ac = rbac();
+    const ac = rbac();
 
-    it('Basic role check', function (done) {
+    it('Basic role check', function () {
 
-        ac.has('role', 'admin')
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
+        return ac.has('role', 'admin')
+            .then(allowed => {
+                if (allowed !== true) {
                     throw new Error('Permission denied');
                 }
-            })
-            .catch(done);
+            });
     });
 
 });
