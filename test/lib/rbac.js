@@ -1,10 +1,8 @@
-/* jshint mocha: true */
-
 'use strict';
 
-var Canornot = require('../../src/index');
+const Canornot = require('../../src/index');
 
-var policySchema = {
+const policySchema = {
     properties: {
         role: {
             $ref: 'actor#/properties/roles'
@@ -23,7 +21,7 @@ function getActorSchemaPromise() {
     });
 }
 
-module.exports = function (/*options*/) {
+module.exports = (/*options*/) => {
     return new Canornot({
         actorSchema: getActorSchemaPromise(),
         policySchema: policySchema

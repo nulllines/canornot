@@ -1,10 +1,8 @@
-/* jshint mocha: true */
-
 'use strict';
 
-var Canornot = require('../../src/index');
+const Canornot = require('../../src/index');
 
-var policySchema = {
+const policySchema = {
     additionalProperties: false,
     properties: {
         'user:get': {
@@ -37,7 +35,6 @@ var policySchema = {
 function getActorSchema() {
     return {
         id: 'actor',
-        $schema: 'http://json-schema.org/draft-04/schema#',
         description: 'Actor Properties',
         type: 'object',
         additionalProperties: false,
@@ -63,7 +60,7 @@ function getActorSchema() {
     };
 }
 
-module.exports = function (/*options*/) {
+module.exports = (/*options*/) => {
     return new Canornot({
         rejectOnPermissionDenied: false,
         actorSchema: getActorSchema(),
