@@ -30,17 +30,28 @@
     "url": "https://github.com/nulllines/canornot/issues"
   },
   "dependencies": {
-    "ajv": "^4.5.0",
-    "debug": "^2.2.0",
-    "lodash.defaultsdeep": "^4.6.0",
-    "lodash.omit": "^4.5.0"
+    "ajv": "^5.0.1",
+    "debug": "^2.6.6"
+  },
+  "engines": {
+    "node": ">= 5"
   },
   "devDependencies": {
-    "benchmark": "^2.1.1",
+    "benchmark": "^2.1.4",
     "chai": "^3.5.0",
-    "coveralls": "^2.11.12",
-    "istanbul": "^0.4.4",
+    "coveralls": "^2.13.1",
+    "eslint": "^3.19.0",
+    "eslint-config-n7s": "^0.1.2",
+    "istanbul": "^0.4.5",
     "jscs": "^3.0.7",
-    "mocha": "^3.0.2"
+    "mocha": "^3.3.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint-config-n7s"
+    ],
+    "env": {
+      "node": true
+    }
   }
 }
