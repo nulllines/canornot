@@ -1,104 +1,81 @@
-/* jshint mocha: true */
+/* eslint-env mocha */
 
 'use strict';
 
-var abac = require('./lib/abac');
+const abac = require('./lib/abac');
 
 describe('ABAC', function () {
 
-    var ac = abac();
+    const ac = abac();
 
-    it('Permission attributes with no more info', function (done) {
+    it('Permission attributes with no more info', function () {
 
-        ac.can('project:list')
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
+        return ac.can('project:list')
+            .then(allowed => {
+                if (allowed !== true) {
                     throw new Error('Permission denied');
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Permission attributes as integer', function (done) {
+    it('Permission attributes as integer', function () {
 
-        ac.can('project:get', 3)
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
+        return ac.can('project:get', 3)
+            .then(allowed => {
+                if (allowed !== true) {
                     throw new Error('Permission denied');
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Permission attributes as integer (REJECTED)', function (done) {
+    it('Permission attributes as integer (REJECTED)', function () {
 
-        ac.can('project:get', 99999)
-            .then(function (allowed) {
+        return ac.can('project:get', 99999)
+            .then(allowed => {
                 if (allowed === true) {
                     throw new Error('This test should disallow permission');
-                } else {
-                    done();
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Permission user:get attributes as undefined (REJECTED)', function (done) {
+    it('Permission user:get attributes as undefined (REJECTED)', function () {
 
-        ac.can('user:get')
-            .then(function (allowed) {
+        return ac.can('user:get')
+            .then(allowed => {
                 if (allowed === true) {
                     throw new Error('This test should disallow permission');
-                } else {
-                    done();
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Permission attributes as object', function (done) {
+    it('Permission attributes as object', function () {
 
-        ac.can('account:get', {account_id: 22})
-            .then(function (allowed) {
-                if (allowed === true) {
-                    done();
-                } else {
+        return ac.can('account:get', {account_id: 22})
+            .then(allowed => {
+                if (allowed !== true) {
                     throw new Error('Permission denied');
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Permission attributes as object (REJECTED)', function (done) {
+    it('Permission attributes as object (REJECTED)', function () {
 
-        ac.can('account:get', {account_id: 999999})
-            .then(function (allowed) {
+        return ac.can('account:get', {account_id: 999999})
+            .then(allowed => {
                 if (allowed === true) {
                     throw new Error('This test should disallow permission');
-                } else {
-                    done();
                 }
-            })
-            .catch(done);
+            });
     });
 
-    it('Permission attributes as object w/undefiend values (REJECTED)', function (done) {
+    it('Permission attributes as object w/undefiend values (REJECTED)', function () {
 
-        ac.can('account:get', {account_id: undefined})
-            .then(function (allowed) {
+        return ac.can('account:get', {account_id: undefined})
+            .then(allowed => {
                 if (allowed === true) {
                     throw new Error('This test should disallow permission');
-                } else {
-                    done();
                 }
-            })
-            .catch(done);
+            });
     });
-
 
 });
-
