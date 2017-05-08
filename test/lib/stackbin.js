@@ -1,18 +1,14 @@
-/* jshint mocha: true */
-
 'use strict';
 
-var Canornot = require('../../src/index');
+const Canornot = require('../../src/index');
 
-var policySchema = {
+const policySchema = {
     id: 'policy',
-    $schema: 'http://json-schema.org/draft-04/schema#',
     description: 'Generic User Policy',
-    additionalProperties: false,
     definitions: {
         account_id: {
             type: 'object',
-            additionalProperties: true,
+            additionalProperties: false,
             required: ['account_id'],
             properties: {
                 account_id: {
@@ -23,9 +19,9 @@ var policySchema = {
         project_id: {
             type: 'object',
             required: ['project_id'],
-            additionalProperties: true,
+            additionalProperties: false,
             properties: {
-                account_id: {
+                project_id: {
                     $ref: 'actor#/properties/project_id'
                 }
             }
@@ -33,14 +29,15 @@ var policySchema = {
         user_id: {
             type: 'object',
             required: ['user_id'],
-            additionalProperties: true,
+            additionalProperties: false,
             properties: {
-                account_id: {
+                user_id: {
                     $ref: 'actor#/properties/user_id'
                 }
             }
         }
     },
+    additionalProperties: false,
     properties: {
 
         /**
@@ -51,14 +48,13 @@ var policySchema = {
         },
         'user:update': {
             $ref: '#/definitions/user_id'
-        },
+        }
 
     }
 };
 
-var actorSchema = {
+const actorSchema = {
     id: 'actor',
-    $schema: 'http://json-schema.org/draft-04/schema#',
     description: 'User Actor',
     type: 'object',
     additionalProperties: false,
@@ -69,7 +65,7 @@ var actorSchema = {
     }
 };
 
-module.exports = function (/*options*/) {
+module.exports = (/*options*/) => {
     return new Canornot({
         rejectOnValidatorError: true,
         rejectOnPermissionDenied: true,
