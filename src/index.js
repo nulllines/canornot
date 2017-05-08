@@ -1,31 +1,17 @@
 'use strict';
 
-var validator = require('ajv');
-var debug = require('debug')('canornot');
+const validator = require('ajv');
+const debug = require('debug')('canornot');
 
-/*var validator = require('is-my-json-valid');
-var validator = require('jsen');*/
+const PermissionError = require('./error').PermissionError;
 
-var _ = {
-    defaultsDeep: require('lodash.defaultsdeep'),
-    omit: require('lodash.omit')
-};
+module.exports = function Canornot(opts = {}) {
 
-function PermissionError(message) {
-    Error.captureStackTrace(this, this.constructor);
-    this.name = this.constructor.name;
-    this.message = message;
-}
-
-require('util').inherits(PermissionError, Error);
-
-module.exports = function (options) {
-
-    options = _.defaultsDeep(options || {}, {
+    const options = Object.assign({
         rejectOnError: true,
         rejectOnPermissionDenied: true,
         returnSchemas: false
-    });
+    }, opts);
 
     /**
      * @returns {Promise<Object>}
@@ -86,194 +72,81 @@ module.exports = function (options) {
     }
 
     /**
-     * @returns {Promise}
-     */
-    function init() {
-
-        return Promise.resolve();
-
-        // return Promise.all([getActorSchema(), getPolicySchema()])
-        //     .then(function (results) {
-        //
-        //         var actorSchema = results[0];
-        //         var policySchema = results[1];
-        //
-        //         if (typeof actorSchema !== 'object') {
-        //             throw new TypeError('Actor Schema must be an object or a function/promise that returns an object. Saw ' + typeof actorSchema);
-        //         }
-        //
-        //         if (typeof policySchema !== 'object') {
-        //             throw new TypeError('Policy Schema must be an object or a function/promise that returns an object. Saw ' + typeof policySchema);
-        //         }
-        //
-        //         if (!loaded) {
-        //             try {
-        //                 console.log('adding actor schema');
-        //                 validator.addSchema(actorSchema, 'actor');
-        //                 console.log('adding policy schema');
-        //                 validator.addSchema(policySchema, 'policy');
-        //                 loaded = true;
-        //             } catch (err) {
-        //                 console.log('kakked it', err.message);
-        //                 throw new Error('Failed to add policy or actor schema: ' + err.message);
-        //
-        //             }
-        //         } else {
-        //             console.log('policies already loaded');
-        //         }
-        //
-        //     });
-    }
-
-    /**
      * @param {String} permission
-     * @param {*} data
+     * @param {String|Number|Object|Array} [data={}]
      * @returns {Promise.<Boolean>}
      */
-    this.can = function (permission, data) {
+    this.can = (permission, data = {}) => {
 
         if (typeof permission !== 'string') {
             return Promise.reject(new TypeError('Permission must be a string'));
         }
 
-        // ajv seems to pass validation with undefined, but not an empty object
-        // so, force it to be an object if data was not passed
-        if (data === undefined) {
-            data = {};
-        }
+        return Promise.all([getActorSchema(), getPolicySchema()])
+            .then(schemas => {
 
-        return init()
-            .then(function () {
+                const [actorSchema, policySchema] = schemas;
 
-                // AJV
-                return Promise.all([getActorSchema(), getPolicySchema()])
-                    .then(function (schemas) {
+                if (typeof actorSchema !== 'object') {
+                    debug('Invalid actor schema');
+                    throw new TypeError('Actor Schema must be an object or a function/promise that returns an object. Saw ' + typeof actorSchema);
+                }
 
-                        var actorSchema = schemas[0];
-                        var policySchema = schemas[1];
+                if (typeof policySchema !== 'object') {
+                    debug('Invalid policy schema');
+                    throw new TypeError('Policy Schema must be an object or a function/promise that returns an object. Saw ' + typeof policySchema);
+                }
 
-                        if (typeof actorSchema !== 'object') {
-                            throw new TypeError('Actor Schema must be an object or a function/promise that returns an object. Saw ' + typeof actorSchema);
-                        }
+                policySchema.additionalProperties = false;
 
-                        if (typeof policySchema !== 'object') {
-                            throw new TypeError('Policy Schema must be an object or a function/promise that returns an object. Saw ' + typeof policySchema);
-                        }
+                const ajv = validator({
+                    missingRefs: 'fail',
+                    breakOnError: true
+                });
 
-                        var ajv = validator({
-                            missingRefs: 'fail',
-                            breakOnError: true
-                        });
+                ajv.addSchema(actorSchema, 'actor');
 
-                        ajv.addSchema(actorSchema, 'actor');
+                const valid = ajv.validate(policySchema, {
+                    [permission]: data
+                });
 
-                        //ajv.addSchema(policySchema, 'policy');
+                // tiny bit of safety to stop stringifying everything even if we're not going to be outputting anything
+                /* istanbul ignore next */
+                if (process.env.DEBUG) {
+                    debug('policySchema', JSON.stringify(policySchema));
+                    debug('actorSchema', JSON.stringify(actorSchema));
+                    debug('Permission data', JSON.stringify({
+                        [permission]: data
+                    }));
+                }
 
-                        // var validate = ajv.compile({
-                        //     $ref: 'policy#/properties/' + permission
-                        // });
+                debug('Permission allowed/valid?', valid);
 
-                        // var valid = validate(data);
-                        //
-                        // var validate = ajv.compile({
-                        //     $ref: 'policy#/properties/' + permission
-                        // });
-
-                        policySchema.additionalProperties = false;
-
-                        var valid = ajv.validate(policySchema, {
-                            [permission]: data
-                        });
-
-                        debug('policySchema', policySchema);
-                        debug('actorSchema', actorSchema);
-                        debug('Permission data', JSON.stringify({
-                            [permission]: data
-                        }));
-                        debug('Permission allowed/valid?', valid);
-
-                        if (options.rejectOnPermissionDenied === true) {
-                            if (!valid) {
-                                debug('Throwing PermissionError', ajv.errors);
-                                var err = new PermissionError('Permission Denied for `' + permission + '` against `' + JSON.stringify(data) + '`');
-                                err.errors = ajv.errors;
-                                throw err;
-                            } else {
-                                if (options.returnSchemas) {
-                                    return {
-                                        actor: actorSchema,
-                                        policy: policySchema
-                                    };
-                                } else {
-                                    return valid;
-                                }
-                            }
+                if (options.rejectOnPermissionDenied === true) {
+                    if (!valid) {
+                        debug('Throwing PermissionError', ajv.errors);
+                        const err = new PermissionError('Permission Denied for `' + permission + '` against `' + JSON.stringify(data) + '`');
+                        err.errors = ajv.errors;
+                        throw err;
+                    } else {
+                        if (options.returnSchemas) {
+                            return {
+                                actor: actorSchema,
+                                policy: policySchema
+                            };
                         } else {
-                            debug('Returning `%s` result: %s', permission, valid);
                             return valid;
                         }
-
-                    });
-
-                // IS MY JSON VALID
-                // return Promise.all([getPolicySchema(), getActorSchema()])
-                //     .then(function (results) {
-                //
-                //         var actorSchema = results[0];
-                //         var policySchema = results[1];
-                //
-                //         var validate = validator({
-                //             $ref: 'policy#/properties/' + permission
-                //         }, {
-                //             // verbose: true,
-                //             // greedy: true,
-                //             schemas: {
-                //                 policy: policySchema,
-                //                 actor: actorSchema
-                //             }
-                //         });
-                //
-                //         console.log('validating', data);
-                //         console.info('config', {
-                //             $ref: 'policy#/properties/' + permission
-                //         }, {
-                //             // verbose: true,
-                //             // greedy: true,
-                //             schemas: {
-                //                 policy: policySchema,
-                //                 actor: actorSchema
-                //             }
-                //         });
-                //
-                //         return validate(data);
-                //
-                //     });
-
-                // JSEN
-                // return Promise.all([getPolicySchema(), getActorSchema()])
-                //     .then(function (results) {
-                //
-                //         var actorSchema = results[0];
-                //         var policySchema = results[1];
-                //
-                //         var validate = validator({
-                //             $ref: '#policy/properties/' + permission
-                //         }, {
-                //             missing$Ref: true,
-                //             schemas: {
-                //                 policy: policySchema,
-                //                 actor: actorSchema
-                //             }
-                //         });
-                //
-                //         var valid = validate(data);
-                //
-                //         return valid;
-                //
-                //     });
+                    }
+                } else {
+                    debug('Returning `%s` result: %s', permission, valid);
+                    return valid;
+                }
 
             })
-            .catch(function (err) {
+            .catch(err => {
+
+                debug('Error fetching actor or policy schema', err.message);
 
                 // it's not a basic permission error;
                 if (err instanceof PermissionError && options.rejectOnPermissionDenied === true) {
@@ -292,6 +165,3 @@ module.exports = function (options) {
     this.has = this.can;
 
 };
-
-// so we can access the validator from outside the scope - nice for testing.
-module.exports.validator = validator;
